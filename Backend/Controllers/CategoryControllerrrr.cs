@@ -10,7 +10,7 @@ namespace Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : ControllerBase
+    public class CategoryControllerrrr : ControllerBase
     {
         // GET: api/<ValuesController>
         [HttpGet]
