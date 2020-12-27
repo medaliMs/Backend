@@ -2,7 +2,7 @@
 
 namespace Backend.Migrations
 {
-    public partial class farouk : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.Models;
+using Backend.Models.Interfaces;
 
 namespace Backend.Controllers
 {
@@ -13,64 +14,68 @@ namespace Backend.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ProductContext _context;
+        private readonly ICategoryRepository categoryrepository;
 
-        public CategoriesController(ProductContext context)
+        public CategoriesController(ICategoryRepository categoryrepository)
         {
-            _context = context;
+            this.categoryrepository = categoryrepository;
         }
+        //private readonly ProductContext _context;
+
+        //public CategoriesController(ProductContext context)
+        //{
+        //    _context = context;
+        //}
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<ActionResult> GetCategories()
         {
-            return await _context.Categories.ToListAsync();
+            return Ok(await categoryrepository.GetCategories ());
         }
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Category>> GetCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-
-            if (category == null)
+            try
             {
-                return NotFound();
-            }
+                var result = await categoryrepository.GetCategory(id);
 
-            return category;
+                if (result == null) return NotFound();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
         }
 
         // PUT: api/Categories/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<ActionResult<Category>> PutCategory(int id, Category category)
         {
-            if (id != category.CategoryId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(category).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CategoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                if (id != category.CategoryId)
+                    return BadRequest("Employee ID mismatch");
 
-            return NoContent();
+                var employeeToUpdate = await categoryrepository.GetCategory(id);
+
+                if (employeeToUpdate == null)
+                    return NotFound($"Employee with Id = {id} not found");
+
+                return await categoryrepository.EditCategory(category);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error updating data");
+            }
         }
 
         // POST: api/Categories
@@ -79,31 +84,48 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Category>> PostCategory(Category category)
         {
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (category == null)
+                    return BadRequest();
 
-            return CreatedAtAction("GetCategory", new { id = category.CategoryId }, category);
+                var createdCategory = await categoryrepository.AddCategory(category);
+
+                return CreatedAtAction(nameof(GetCategory),
+                    new { id = createdCategory.CategoryId }, createdCategory);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error creating new employee record");
+            }
         }
 
         // DELETE: api/Categories/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Category>> DeleteCategory(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            try
             {
-                return NotFound();
+                var categoryToDelete = await categoryrepository.GetCategory(id);
+
+                if (categoryToDelete == null)
+                {
+                    return NotFound($"Employee with Id = {id} not found");
+                }
+
+                return await categoryrepository.delete(id);
             }
-
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-
-            return category;
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error deleting data");
+            }
         }
 
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.CategoryId == id);
-        }
+        //private bool CategoryExists(int id)
+        //{
+        //    return categoryrepository.Categories.Any(e => e.CategoryId == id);
+        //}
     }
 }

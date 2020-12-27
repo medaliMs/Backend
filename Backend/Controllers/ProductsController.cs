@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.Models;
+using Backend.Models.Interfaces;
 
 namespace Backend.Controllers
 {
@@ -13,64 +14,76 @@ namespace Backend.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly ProductContext _context;
+        //private readonly ProductContext _context;
 
-        public ProductsController(ProductContext context)
+        //public ProductsController(ProductContext context)
+        //{
+        //    _context = context;
+        //}
+        private readonly IProductRepository productrepository;
+
+        public ProductsController(IProductRepository productrepository)
         {
-            _context = context;
+            this.productrepository = productrepository;
         }
 
         // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult> GetProducts()
         {
-            return await _context.Products.ToListAsync();
+            try
+            {
+                return Ok(await productrepository.GetProducts());
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
         }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-
-            if (product == null)
+            try
             {
-                return NotFound();
-            }
+                var result = await productrepository.GetProduct(id);
 
-            return product;
+                if (result == null) return NotFound();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
         }
 
         // PUT: api/Products/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
+        public async Task<ActionResult<Product>> PutProduct(int id, Product product)
         {
-            if (id != product.ProductId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(product).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                if (id != product.ProductId)
+                    return BadRequest("Product ID mismatch");
 
-            return NoContent();
+                var employeeToUpdate = await productrepository.GetProduct(id);
+
+                if (employeeToUpdate == null)
+                    return NotFound($"Product with Id = {id} not found");
+
+                return await productrepository.EditProduct(product);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error updating data");
+            }
         }
 
         // POST: api/Products
@@ -79,31 +92,70 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (product == null)
+                    return BadRequest();
 
-            return CreatedAtAction("GetProduct", new { id = product.ProductId }, product);
+                var createdProduct = await productrepository.AddProduct(product);
+
+                return CreatedAtAction(nameof(GetProduct),
+                    new { id = createdProduct.ProductId }, createdProduct);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error creating new Product record");
+
+            }
         }
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Product>> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            try
             {
+                var productToDelete = await productrepository.GetProduct(id);
+
+                if (productToDelete == null)
+                {
+                    return NotFound($"Product with Id = {id} not found");
+                }
+
+                return await productrepository.DeleteProduct(id);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error deleting data");
+            }
+        }
+
+        [HttpGet("{search}")]
+        public async Task<ActionResult<IEnumerable<Product>>> Search(string name)
+        {
+            try
+            {
+                var result = await productrepository.Search(name);
+
+                if (result.Any())
+                {
+                    return Ok(result);
+                }
+
                 return NotFound();
             }
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            return product;
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error retrieving data from the database");
+            }
         }
 
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.ProductId == id);
-        }
+        //private bool ProductExists(int id)
+        //{
+        //    return _context.Products.Any(e => e.ProductId == id);
+        //}
     }
 }

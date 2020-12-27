@@ -15,59 +15,72 @@ namespace Backend.Models.Repositories
         {
             this.context = context;
         }
-        public void Add(Product product)
+        public async Task<Product> AddProduct(Product product)
         {
-            context.Products.Add(product);
-            context.SaveChanges();
+            var result = await context.Products.AddAsync(product);
+            await context.SaveChangesAsync();
+            return result.Entity;
         }
 
-        public void Delete(Product product)
+        public async Task<Product> DeleteProduct(int id)
         {
-            Product p1 = context.Products.Find(product.ProductId);
-            if (p1 != null)
+            var result = await context.Products.FirstOrDefaultAsync(c => c.CategoryId == id);
+            if (result != null)
             {
-                context.Products.Remove(p1);
-                context.SaveChanges();
+                context.Products.Remove(result);
+                await context.SaveChangesAsync();
+                return result;
             }
+            return null;
         }
 
-        public void Edit(Product newproduct)
+        public async Task<Product> EditProduct(Product newproduct)
         {
-            Product oldstudent = context.Products.Find(newproduct.ProductId);
-            if (oldstudent != null)
+            var result = await context.Products.FirstOrDefaultAsync(c => c.ProductId == newproduct.ProductId);
+            if (result != null)
             {
-                oldstudent.ProductName = newproduct.ProductName;
-                oldstudent.price = newproduct.price;
-                oldstudent.description = newproduct.description;
-                oldstudent.MiniDescription = newproduct.MiniDescription;
-                oldstudent.imageUrl = newproduct.imageUrl;
-                oldstudent.IsDispo = newproduct.IsDispo;
-                oldstudent.CategoryId = newproduct.CategoryId;
-                context.SaveChanges();
+                result.ProductName = newproduct.ProductName;
+                result.price = newproduct.price;
+                result.description = newproduct.description;
+                result.MiniDescription = newproduct.MiniDescription;
+                result.imageUrl = newproduct.imageUrl;
+                result.IsDispo = newproduct.IsDispo;
+                result.CategoryId = newproduct.CategoryId;
+                await context.SaveChangesAsync();
+
+                return result;
             }
+            return null;
 
         }
 
-        public IList<Product> FindByName(string name)
+        
+
+        public async Task<IEnumerable<Product>> GetProducts()
         {
-            return context.Products.Where(s => s.ProductName.Contains(name)).Include(std => std.Category).ToList();
+            return await context.Products.ToListAsync();
         }
 
-        public IList<Product> GetAll()
+        public async Task<Product> GetProduct(int id)
         {
-            return context.Products.OrderBy(x => x.ProductName).Include(x => x.Category).ToList();
+            return await context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
         }
 
-        public Product GetById(int id)
+        public async Task<IEnumerable<Product>> Search(string name)
         {
-            return context.Products.Where(x => x.ProductId == id).Include(x => x.Category).SingleOrDefault();
+            IQueryable<Product> query = context.Products;
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(p => p.ProductName.Contains(name));
+            }
+            return await query.ToListAsync();
+
         }
 
-        public IList<Product> GetProductsByCategoryID(int? categoryId)
+        public async Task<Product> GetByName(string name)
         {
-            return context.Products.Where(s => s.CategoryId.Equals(categoryId))
-                .OrderBy(s => s.ProductName)
-                .Include(std => std.Category).ToList();
+            return await context.Products.FirstOrDefaultAsync(c => c.ProductName == name);
         }
+
     }
 }

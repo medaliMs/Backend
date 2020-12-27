@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace Backend.Models.Interfaces
 {
-    interface ICategoryRepository
+    public interface ICategoryRepository
     {
-        IList<Category> GetAll();
-        Category GetById(int id);
-        void Add(Category category);
-        void Edit(Category category);
-        void delete(Category category);
-        Category GetByName(string name);
+        Task<IEnumerable<Category>> GetCategories();
+        Task<Category> GetCategory(int id);
+        Task<Category> AddCategory(Category category);
+        Task<Category> EditCategory(Category category);
+        Task<Category> delete(int categoryid);
+        Task<Category> GetByName(string name);
         int ProductCount(int categoryId);
     }
 }

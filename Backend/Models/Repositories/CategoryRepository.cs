@@ -1,4 +1,5 @@
 ﻿using Backend.Models.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,45 +15,53 @@ namespace Backend.Models.Repositories
         {
             this.context = context;
         }
-        public void Add(Category category)
+        public async Task<Category> AddCategory(Category category)
         {
-            context.Categories.Add(category);
-            context.SaveChanges();
+            var result = await context.Categories.AddAsync(category);
+            await context.SaveChangesAsync();
+            return result.Entity;
         }
 
-        public void delete(Category category)
+        public async Task<Category> delete(int categoryid)
         {
-            Category c1 = context.Categories.Find(category.CategoryId);
-            if (c1 != null)
+            var result = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == categoryid);
+            if(result != null)
             {
-                context.Categories.Remove(c1);
-                context.SaveChanges();
+                context.Categories.Remove(result);
+                await context.SaveChangesAsync();
+                return result;
             }
+            return null;
         }
 
-        public void Edit(Category category)
+        public async Task<Category> EditCategory(Category category)
         {
-            Category c1 = context.Categories.Find(category.CategoryId);
-            if (c1 != null)
+            var result = await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == category.CategoryId);
+            if(result != null)
             {
-                c1.CategoryName = category.CategoryName;
+                result.CategoryName = category.CategoryName;
+                result.Image = category.Image;
+                await context.SaveChangesAsync();
 
+                return result;
             }
+            return null;
+
         }
 
-        public IList<Category> GetAll()
+        public async Task<IEnumerable<Category>> GetCategories()
         {
-            return context.Categories.OrderBy(s => s.CategoryName).ToList();
+            return await context.Categories.ToListAsync();
         }
 
-        public Category GetById(int id)
+        public async  Task<Category> GetCategory(int id)
         {
-            return context.Categories.Find(id);
+            return await context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
         }
 
-        public Category GetByName(string name)
+        public async Task<Category> GetByName(string name)
         {
-            return context.Categories.Find(name);
+            return await context.Categories.FirstOrDefaultAsync(c => c.CategoryName == name);
         }
         public int ProductCount(int categoryId)
         {

@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 
 namespace Backend.Models.Interfaces
 {
-    interface IProductRepository
+    public interface IProductRepository
     {
-        IList<Product> GetAll();
-        Product GetById(int id);
-        void Add(Product product);
-        void Edit(Product product);
-        void Delete(Product product);
-        IList<Product> GetProductsByCategoryID(int? categoryId);
-        IList<Product> FindByName(string name);
+        Task<IEnumerable<Product>> GetProducts();
+        Task<Product> GetProduct(int id);
+        Task<Product> AddProduct(Product product);
+        Task<Product> EditProduct(Product product);
+        Task<Product> DeleteProduct(int id);
+        Task<Product> GetByName(string name);
+        Task<IEnumerable<Product>> Search(string name);
+        
     }
 }
