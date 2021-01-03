@@ -2,7 +2,7 @@
 
 namespace Backend.Migrations
 {
-    public partial class init : Migration
+    public partial class ggwp : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

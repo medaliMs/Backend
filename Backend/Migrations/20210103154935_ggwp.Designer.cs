@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(ProductContext))]
-    [Migration("20201227180316_init")]
-    partial class init
+    [Migration("20210103154935_ggwp")]
+    partial class ggwp
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -10,6 +10,6 @@
         public string imageUrl { get; set; }
         public bool IsDispo { get; set; }
         public int CategoryId { get; set; }
-        public Category Category { get; set; }
+        //public Category Category { get; set; }
     }
 }

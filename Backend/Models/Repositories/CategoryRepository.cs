@@ -51,7 +51,7 @@ namespace Backend.Models.Repositories
 
         public async Task<IEnumerable<Category>> GetCategories()
         {
-            return await context.Categories.ToListAsync();
+            return await context.Categories.Include(c=>c.Products).ToListAsync();
         }
 
         public async  Task<Category> GetCategory(int id)
