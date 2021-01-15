@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(ProductContext))]
-    [Migration("20210103154935_ggwp")]
-    partial class ggwp
+    [Migration("20210107225853_gg")]
+    partial class gg
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -63,8 +63,8 @@ namespace Backend.Migrations
                     b.Property<string>("imageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("price")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProductId");
 
@@ -75,7 +75,7 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.Product", b =>
                 {
-                    b.HasOne("Backend.Models.Category", "Category")
+                    b.HasOne("Backend.Models.Category", null)
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)

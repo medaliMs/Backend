@@ -132,26 +132,26 @@ namespace Backend.Controllers
             }
         }
 
-        [HttpGet("{search}")]
-        public async Task<ActionResult<IEnumerable<Product>>> Search(string name)
-        {
-            try
-            {
-                var result = await productrepository.Search(name);
+        //[HttpGet("{search}")]
+        //public async Task<ActionResult<IEnumerable<Product>>> Search(string name)
+        //{
+        //    try
+        //    {
+        //        var result = await productrepository.Search(name);
 
-                if (result.Any())
-                {
-                    return Ok(result);
-                }
+        //        if (result.Any())
+        //        {
+        //            return Ok(result);
+        //        }
 
-                return NotFound();
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Error retrieving data from the database");
-            }
-        }
+        //        return NotFound();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError,
+        //            "Error retrieving data from the database");
+        //    }
+        //}
 
         //private bool ProductExists(int id)
         //{

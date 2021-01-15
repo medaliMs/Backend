@@ -2,7 +2,7 @@
 
 namespace Backend.Migrations
 {
-    public partial class ggwp : Migration
+    public partial class gg : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -27,7 +27,7 @@ namespace Backend.Migrations
                     ProductId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductName = table.Column<string>(nullable: true),
-                    price = table.Column<decimal>(nullable: false),
+                    price = table.Column<string>(nullable: true),
                     description = table.Column<string>(nullable: true),
                     MiniDescription = table.Column<string>(nullable: true),
                     imageUrl = table.Column<string>(nullable: true),

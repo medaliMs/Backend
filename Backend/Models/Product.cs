@@ -4,7 +4,7 @@
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
-        public decimal price { get; set; }
+        public string price { get; set; }
         public string description { get; set; }
         public string MiniDescription { get; set; }
         public string imageUrl { get; set; }

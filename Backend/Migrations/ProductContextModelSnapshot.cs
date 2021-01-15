@@ -61,8 +61,8 @@ namespace Backend.Migrations
                     b.Property<string>("imageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("price")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProductId");
 
